@@ -29,53 +29,50 @@ if 'vibe_manager' not in st.session_state:
 st.markdown("<h1 class='main-title'>Viso Vibe</h1>", unsafe_allow_html=True)
 st.markdown("<p class='sub-title'>Discover your aesthetic. Feel the rhythm. 🎧</p>", unsafe_allow_html=True)
 
-# Main Glass Container
-st.markdown("<div class='glass-container'>", unsafe_allow_html=True)
+# Main container for Glassmorphism
+with st.container():
+    # Camera Input
+    captured_image = st.camera_input("Capture your vibe")
 
-# Camera Input
-captured_image = st.camera_input("Capture your vibe")
+    if captured_image is not None:
+        # Save the captured image temporarily for DeepFace
+        temp_image_path = "temp_capture.jpg"
+        with open(temp_image_path, "wb") as f:
+            f.write(captured_image.getbuffer())
 
-if captured_image is not None:
-    # Save the captured image temporarily for DeepFace
-    temp_image_path = "temp_capture.jpg"
-    with open(temp_image_path, "wb") as f:
-        f.write(captured_image.getbuffer())
-
-    with st.spinner("Analyzing your aesthetic... 🌌"):
-        # Analyze Emotion
-        mood = st.session_state.vibe_manager.analyze_emotion(temp_image_path)
-        
-        if mood:
-            st.success(f"Vibe Detected: **{mood.capitalize()}** ⚡")
+        with st.spinner("Analyzing your aesthetic... 🌌"):
+            # Analyze Emotion
+            mood = st.session_state.vibe_manager.analyze_emotion(temp_image_path)
             
-            # Play Vibe Music
-            with st.spinner("Tuning into your frequency... 🎵"):
-                result = st.session_state.vibe_manager.play_vibe(mood)
+            if mood:
+                st.success(f"Vibe Detected: **{mood.capitalize()}** ⚡")
                 
-                if "error" in result:
-                    st.error(result["error"])
-                else:
-                    st.markdown("<hr style='border:1px solid rgba(255,20,147,0.3);'>", unsafe_allow_html=True)
+                # Play Vibe Music
+                with st.spinner("Tuning into your frequency... 🎵"):
+                    result = st.session_state.vibe_manager.play_vibe(mood)
                     
-                    # Display Song Info beautifully
-                    col1, col2 = st.columns([1, 2])
-                    
-                    with col1:
-                        if result.get("album_url"):
-                            st.image(result["album_url"], use_container_width=True)
-                    
-                    with col2:
-                        st.markdown(f"### Now Playing")
-                        st.markdown(f"**{result['song']}**")
-                        st.markdown(f"*{result['artist']}*")
-        else:
-            st.error("Could not capture a clear vibe. Please try again.")
-            
-    # Clean up temp image
-    if os.path.exists(temp_image_path):
-        os.remove(temp_image_path)
-
-st.markdown("</div>", unsafe_allow_html=True)
+                    if "error" in result:
+                        st.error(result["error"])
+                    else:
+                        st.markdown("<hr style='border:1px solid rgba(255,20,147,0.3);'>", unsafe_allow_html=True)
+                        
+                        # Display Song Info beautifully
+                        col1, col2 = st.columns([1, 2])
+                        
+                        with col1:
+                            if result.get("album_url"):
+                                st.image(result["album_url"], use_container_width=True)
+                        
+                        with col2:
+                            st.markdown(f"### Now Playing")
+                            st.markdown(f"**{result['song']}**")
+                            st.markdown(f"*{result['artist']}*")
+            else:
+                st.error("Could not capture a clear vibe. Please try again.")
+                
+        # Clean up temp image
+        if os.path.exists(temp_image_path):
+            os.remove(temp_image_path)
 
 # Footer
 st.markdown(

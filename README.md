@@ -1,71 +1,71 @@
-# Viso Vibe 🎶✨
+# Viso Vibe 🎶
 
-**Viso Vibe** is a modern, beautifully designed web application that analyzes your facial expression to detect your current mood and automatically plays a matching Spotify playlist to elevate your vibe. 
+Viso Vibe is an AI-powered, emotion-driven music player that curates the perfect soundtrack based on your current mood. By simply looking at your camera, Viso Vibe analyzes your facial expression, detects your emotional state, and seamlessly plays a custom-tailored YouTube music playlist to match your frequency.
 
-Originally built as a basic desktop script, it has been completely reimagined into a sleek, web-based experience using Streamlit with advanced glassmorphism CSS, dynamic background animations, and an upgraded architectural backbone.
+## ✨ Features
 
----
+- **Live Emotion Detection:** Uses advanced computer vision (ONNX/OpenCV) to detect faces and analyze your mood in real-time.
+- **Dynamic 4-Mood Categorization:** Maps your facial expression to one of four core emotional states:
+  - ☀️ **Happy** (Radiant & Electric)
+  - 🌊 **Sad** (Deep & Reflective)
+  - 🌿 **Calm** (Serene & Balanced)
+  - 🔥 **Angry** (Raw & Intense)
+- **Seamless Music Integration:** Automatically plays a randomized, curated YouTube playlist corresponding to your detected emotion using a custom, invisible YouTube iframe API integration.
+- **Premium UI/UX:** Built with Streamlit but heavily customized with modern HTML/CSS. Features a stunning dark mode aesthetic, animated particle visualizers, glassmorphism UI elements, and a custom interactive media player.
+- **Audio Feedback:** Provides text-to-speech (TTS) audio feedback confirming your detected emotion.
 
-## 🚀 Features
+## 🛠️ Tech Stack
 
-- **Aesthetic UI**: Insane-level custom CSS featuring animated mesh gradients, glassmorphism containers, and vibrant typography.
-- **Emotion Analysis**: Leverages `DeepFace` to accurately read your facial expressions directly from your browser.
-- **Spotify Integration**: Connects to your Spotify account to seamlessly control playback, mute/unmute, and fetch track artwork.
-- **Vibe Announcements**: Uses `pyttsx3` text-to-speech to announce your detected mood and the song that is currently playing.
-- **Modular Codebase**: Cleanly separated frontend (`app.py`) and backend logic (`viso_vibe_core.py`).
+- **Frontend/UI:** Streamlit, Custom HTML/CSS/JS, Google Fonts (Inter, Space Mono)
+- **Backend/Logic:** Python
+- **Computer Vision & AI:** OpenCV (`opencv-python-headless`), ONNX Runtime (`onnxruntime`), PIL (Pillow)
+- **Audio Processing:** `gTTS` (Google Text-to-Speech)
+- **Media Streaming:** YouTube IFrame Player API
 
-## 🛠️ Prerequisites
-
-Before you begin, ensure you have the following:
-1. **Python 3.8+** installed on your machine.
-2. A **Spotify Developer Account**.
-   - Go to the [Spotify Developer Dashboard](https://developer.spotify.com/dashboard/).
-   - Create an app and get your `Client ID` and `Client Secret`.
-   - Add `http://localhost:8888/callback` as a Redirect URI in your Spotify app settings.
-
-## 📦 Installation
+## 🚀 Local Installation
 
 1. **Clone the repository:**
    ```bash
    git clone https://github.com/LORDMOSTER/Viso-Vibe.git
-   cd Viso-Vibe
+   cd Viso-Vibe/VisoVibe
    ```
 
-2. **Install the required dependencies:**
+2. **Install the dependencies:**
+   Make sure you have Python 3.8+ installed.
    ```bash
-   pip install streamlit opencv-python pyttsx3 spotipy deepface pillow
-   ```
-   *(Note: DeepFace might install additional dependencies like TensorFlow/Keras on first run.)*
-
-3. **Set up Environment Variables:**
-   Create a `.env` file in the root directory (or use Streamlit secrets) and add your Spotify credentials:
-   ```env
-   SPOTIPY_CLIENT_ID=your_client_id_here
-   SPOTIPY_CLIENT_SECRET=your_client_secret_here
-   SPOTIPY_REDIRECT_URI=http://localhost:8888/callback
+   pip install -r requirements.txt
    ```
 
-## 🎮 Usage
+3. **Run the application:**
+   ```bash
+   python -m streamlit run app.py
+   ```
 
-Run the Streamlit application from your terminal:
+## ☁️ Deploying on Streamlit Community Cloud
 
-```bash
-streamlit run app.py
+Viso Vibe is fully configured to be deployed for free on [Streamlit Community Cloud](https://streamlit.io/cloud). 
+
+1. Push your repository to GitHub (ensure `app.py`, `requirements.txt`, and the `Emotion_onnx-main` folder containing the `.onnx` weight files are included).
+2. Log in to Streamlit Community Cloud and click **New App**.
+3. Select your GitHub repository, set the branch to `main`, and set the Main file path to `VisoVibe/app.py`.
+4. Click **Deploy!**
+
+*Note: The `requirements.txt` specifically uses `opencv-python-headless` to ensure compatibility with Linux server environments that lack GUI libraries.*
+
+## 📁 Repository Structure
+
+```text
+Viso-Vibe/
+└── VisoVibe/
+    ├── app.py                  # Main Streamlit application and UI logic
+    ├── requirements.txt        # Python dependencies for deployment
+    └── Emotion_onnx-main/      # Local face detection and emotion recognition module
+        ├── util.py             # Inference utilities
+        └── weights/
+            ├── detection.onnx  # Face detection model weights
+            └── emotion.onnx    # Emotion classification model weights
 ```
 
-- Allow your browser to access the camera.
-- Click **Capture your vibe** to snap a photo.
-- Watch as Viso Vibe detects your mood and tunes Spotify into the perfect frequency! 🎧
+## 📜 License
 
-## 📂 Project Structure
-
-- `app.py`: The main Streamlit entry point. Handles the UI layout, camera input, and state management.
-- `viso_vibe_core.py`: The backend engine managing DeepFace inference, Spotify OAuth/playback, and TTS.
-- `style.css`: Contains all the premium CSS styling (glassmorphism, gradients).
-- `README.md`: Project documentation.
-
-## 🤝 Contributing
-Feel free to open an issue or submit a pull request if you want to improve the model accuracy, add new vibes, or enhance the UI!
-
----
-*Created with aesthetic in mind.*
+This project is created for educational and entertainment purposes. Ensure you comply with YouTube's Terms of Service when embedding and streaming playlists.

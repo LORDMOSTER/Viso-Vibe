@@ -84,19 +84,15 @@ st.markdown(f"""
 <style>
 @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&family=Space+Mono:wght@400;700&display=swap');
 
-*, *::before, *::after {{
-    box-sizing: border-box;
-    margin: 0;
-    padding: 0;
-    -webkit-font-smoothing: antialiased;
-    -moz-osx-font-smoothing: grayscale;
-}}
-
 html, body, [data-testid="stApp"] {{
     font-family: 'Inter', system-ui, sans-serif;
     background: #06060F;
     overflow-x: hidden;
     min-height: 100vh;
+    margin: 0;
+    padding: 0;
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
 }}
 
 /* ── Ambient background ── */

@@ -1,0 +1,18 @@
+# Python cache & virtual environments
+__pycache__/
+*.py[cod]
+*$py.class
+*.env
+.venv/
+env/
+venv/
+
+# Streamlit secrets (protect cloud credentials from being pushed to public git)
+.streamlit/secrets.toml
+VisoVibe/.streamlit/secrets.toml
+
+# Local database file
+*.db
+visovibe.db
+VisoVibe/visovibe.db
+

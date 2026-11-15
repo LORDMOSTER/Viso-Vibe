@@ -40,7 +40,7 @@ class FaceDetector:
             assert onnx_path is not None
             assert os.path.exists(onnx_path)
             self.session = InferenceSession(onnx_path,
-                                            providers=['CUDAExecutionProvider'])
+                                            providers=['CUDAExecutionProvider', 'CPUExecutionProvider'])
         self.nms_thresh = 0.4
         self.center_cache = {}
         input_cfg = self.session.get_inputs()[0]
@@ -212,7 +212,7 @@ class HSEmotionRecognizer:
                              5: 'SADNESS',
                              6: 'SURPRISE'}
 
-        self.ort_session = ort.InferenceSession(path, providers=['CUDAExecutionProvider'])
+        self.ort_session = ort.InferenceSession(path, providers=['CUDAExecutionProvider', 'CPUExecutionProvider'])
 
     def preprocess(self, img):
         x = cv2.resize(img, (self.img_size, self.img_size)) / 255

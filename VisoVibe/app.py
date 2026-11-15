@@ -624,51 +624,110 @@ button[kind="primary"]:active {{
     display: flex;
     justify-content: space-between;
     align-items: center;
-    padding: 8px 16px;
-    margin-bottom: 20px;
+    padding: 10px 20px;
+    margin-bottom: 22px;
     background: rgba(255, 255, 255, 0.03);
     border: 1px solid rgba(255, 255, 255, 0.08);
     border-radius: 100px;
-    backdrop-filter: blur(20px);
+    backdrop-filter: blur(30px);
+    box-shadow: 0 10px 30px rgba(0,0,0,0.4), inset 0 1px 0 rgba(255,255,255,0.06);
 }}
 .user-info-text {{
     font-size: 10px;
     font-weight: 600;
     letter-spacing: 2px;
     text-transform: uppercase;
-    color: rgba(255, 255, 255, 0.7);
+    color: rgba(255, 255, 255, 0.75);
+    display: flex;
+    align-items: center;
+    gap: 8px;
 }}
 .user-status-pill {{
-    color: rgba({c1}, 0.9);
+    display: inline-block;
+    padding: 2px 10px;
+    border-radius: 20px;
+    background: rgba({c1}, 0.15);
+    border: 1px solid rgba({c1}, 0.35);
+    color: rgba({c1}, 1);
     font-weight: 700;
+    font-family: 'Space Mono', monospace;
 }}
-.streamlit-expanderHeader {{
-    background: rgba(255, 255, 255, 0.02) !important;
-    border: 1px solid rgba(255, 255, 255, 0.07) !important;
-    border-radius: 14px !important;
-    color: rgba(255, 255, 255, 0.75) !important;
+div[data-testid="stExpander"] {{
+    border: 1px solid rgba(255, 255, 255, 0.08) !important;
+    border-radius: 16px !important;
+    background: rgba(12, 12, 24, 0.6) !important;
+    backdrop-filter: blur(25px) !important;
+    margin-bottom: 20px !important;
+    overflow: hidden !important;
+    box-shadow: 0 10px 30px rgba(0,0,0,0.3) !important;
+}}
+div[data-testid="stExpander"] details summary {{
+    padding: 12px 16px !important;
+    font-family: 'Space Mono', monospace !important;
     font-size: 11px !important;
     letter-spacing: 1.5px !important;
     text-transform: uppercase !important;
+    color: rgba(255, 255, 255, 0.85) !important;
+}}
+div[data-baseweb="tab-list"] {{
+    background: rgba(255, 255, 255, 0.02) !important;
+    border-radius: 12px !important;
+    padding: 4px !important;
+    gap: 6px !important;
+    border: 1px solid rgba(255, 255, 255, 0.05) !important;
+}}
+button[data-baseweb="tab"] {{
+    font-family: 'Space Mono', monospace !important;
+    font-size: 10px !important;
+    letter-spacing: 1.5px !important;
+    text-transform: uppercase !important;
+    color: rgba(255, 255, 255, 0.5) !important;
+    border-radius: 8px !important;
+    padding: 6px 14px !important;
+}}
+button[data-baseweb="tab"][aria-selected="true"] {{
+    background: rgba({c1}, 0.15) !important;
+    color: rgba({c1}, 1) !important;
+    font-weight: 700 !important;
+}}
+div[data-baseweb="input"] input {{
+    background: rgba(255, 255, 255, 0.03) !important;
+    border: 1px solid rgba(255, 255, 255, 0.08) !important;
+    border-radius: 10px !important;
+    color: #FFFFFF !important;
+    font-family: 'Inter', sans-serif !important;
+    font-size: 12px !important;
+}}
+div[data-baseweb="input"] input:focus {{
+    border-color: rgba({c1}, 0.7) !important;
+    box-shadow: 0 0 15px rgba({c1}, 0.25) !important;
 }}
 .playlist-card-row {{
     display: flex;
     justify-content: space-between;
     align-items: center;
-    padding: 10px 14px;
-    margin-bottom: 8px;
+    padding: 12px 16px;
+    margin-bottom: 10px;
     background: rgba(255, 255, 255, 0.03);
-    border: 1px solid rgba(255, 255, 255, 0.06);
-    border-radius: 12px;
+    border: 1px solid rgba(255, 255, 255, 0.07);
+    border-radius: 14px;
+    transition: all 0.2s ease;
+}}
+.playlist-card-row:hover {{
+    background: rgba(255, 255, 255, 0.05);
+    border-color: rgba({c1}, 0.3);
+    transform: translateX(2px);
 }}
 .playlist-card-title {{
-    font-size: 12px;
+    font-size: 12.5px;
     font-weight: 600;
-    color: rgba(255, 255, 255, 0.9);
+    color: rgba(255, 255, 255, 0.95);
+    margin-bottom: 2px;
 }}
 .playlist-card-sub {{
-    font-size: 9px;
-    color: rgba(255, 255, 255, 0.4);
+    font-size: 9.5px;
+    font-family: 'Space Mono', monospace;
+    color: rgba({c1}, 0.8);
     letter-spacing: 1px;
 }}
 /* ── Error ── */
@@ -749,6 +808,7 @@ else:
     with col_u2:
         if st.button("Log Out", key="btn_logout", use_container_width=True):
             st.session_state.user = None
+            st.session_state.custom_queue = []
             st.rerun()
 
     # User Playlist Customization
@@ -859,9 +919,34 @@ if st.session_state.luffy_vibe is None:
                 tts_buf.seek(0)
                 st.session_state.naruto = base64.b64encode(tts_buf.read()).decode("utf-8")
 
-                st.session_state.yt_id       = zoro_yt.get(luffy, zoro_yt["calm"])
-                st.session_state.sai         = meta_map.get(luffy, meta_map["calm"])[0]
-                st.session_state.rock_artist = meta_map.get(luffy, meta_map["calm"])[1]
+                                # Load user custom playlists if authenticated, else use curated defaults
+                cur_user = st.session_state.get('user', None)
+                user_queue = []
+                if cur_user:
+                    user_pls = get_user_playlists(cur_user['id']).get(luffy, [])
+                    for pl in user_pls:
+                        user_queue.append({
+                            "title": pl['title'],
+                            "artist": pl['artist'],
+                            "source_type": pl['source_type'],
+                            "source_id": pl['source_id']
+                        })
+
+                if user_queue:
+                    st.session_state.custom_queue = user_queue
+                    st.session_state.sai         = user_queue[0]['title']
+                    st.session_state.rock_artist = user_queue[0]['artist']
+                    st.session_state.yt_id       = user_queue[0]['source_id']
+                else:
+                    st.session_state.custom_queue = [{
+                        "title": meta_map.get(luffy, meta_map["calm"])[0],
+                        "artist": meta_map.get(luffy, meta_map["calm"])[1],
+                        "source_type": "playlist",
+                        "source_id": zoro_yt.get(luffy, zoro_yt["calm"])
+                    }]
+                    st.session_state.yt_id       = zoro_yt.get(luffy, zoro_yt["calm"])
+                    st.session_state.sai         = meta_map.get(luffy, meta_map["calm"])[0]
+                    st.session_state.rock_artist = meta_map.get(luffy, meta_map["calm"])[1]
 
                 st.rerun()
 
@@ -932,6 +1017,7 @@ else:
         if st.button("↺  New Scan", key="reset_btn", type="primary", use_container_width=True):
             for key in ["luffy_vibe", "sai", "rock_artist", "yt_id", "naruto"]:
                 st.session_state[key] = None
+            st.session_state["custom_queue"] = []
             st.rerun()
 
 

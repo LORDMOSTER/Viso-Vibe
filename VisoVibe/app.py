@@ -609,7 +609,7 @@ button[kind="primary"]:active {{
 }}
 
 /* ── Auth & Playlist Management Bar ── */
-.user-bar-container {
+.user-bar-container {{
     display: flex;
     justify-content: space-between;
     align-items: center;
@@ -619,19 +619,19 @@ button[kind="primary"]:active {{
     border: 1px solid rgba(255, 255, 255, 0.08);
     border-radius: 100px;
     backdrop-filter: blur(20px);
-}
-.user-info-text {
+}}
+.user-info-text {{
     font-size: 10px;
     font-weight: 600;
     letter-spacing: 2px;
     text-transform: uppercase;
     color: rgba(255, 255, 255, 0.7);
-}
-.user-status-pill {
+}}
+.user-status-pill {{
     color: rgba({c1}, 0.9);
     font-weight: 700;
-}
-.streamlit-expanderHeader {
+}}
+.streamlit-expanderHeader {{
     background: rgba(255, 255, 255, 0.02) !important;
     border: 1px solid rgba(255, 255, 255, 0.07) !important;
     border-radius: 14px !important;
@@ -639,8 +639,8 @@ button[kind="primary"]:active {{
     font-size: 11px !important;
     letter-spacing: 1.5px !important;
     text-transform: uppercase !important;
-}
-.playlist-card-row {
+}}
+.playlist-card-row {{
     display: flex;
     justify-content: space-between;
     align-items: center;
@@ -649,17 +649,17 @@ button[kind="primary"]:active {{
     background: rgba(255, 255, 255, 0.03);
     border: 1px solid rgba(255, 255, 255, 0.06);
     border-radius: 12px;
-}
-.playlist-card-title {
+}}
+.playlist-card-title {{
     font-size: 12px;
     font-weight: 600;
     color: rgba(255, 255, 255, 0.9);
-}
-.playlist-card-sub {
+}}
+.playlist-card-sub {{
     font-size: 9px;
     color: rgba(255, 255, 255, 0.4);
     letter-spacing: 1px;
-}
+}}
 /* ── Error ── */
 div[data-testid="stAlert"] {{
     background: rgba(220,30,30,0.06) !important;

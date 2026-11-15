@@ -12,17 +12,21 @@ def get_turso_credentials():
     try:
         if hasattr(st, "secrets"):
             if "TURSO_DATABASE_URL" in st.secrets:
-                url = st.secrets["TURSO_DATABASE_URL"]
+                url = str(st.secrets["TURSO_DATABASE_URL"]).strip().strip('"').strip("'")
             if "TURSO_AUTH_TOKEN" in st.secrets:
-                token = st.secrets["TURSO_AUTH_TOKEN"]
+                token = str(st.secrets["TURSO_AUTH_TOKEN"]).strip().strip('"').strip("'")
     except Exception:
         pass
 
     # 2. Check environment variables as fallback
     if not url:
-        url = os.environ.get("TURSO_DATABASE_URL")
+        raw_url = os.environ.get("TURSO_DATABASE_URL")
+        if raw_url:
+            url = raw_url.strip().strip('"').strip("'")
     if not token:
-        token = os.environ.get("TURSO_AUTH_TOKEN")
+        raw_token = os.environ.get("TURSO_AUTH_TOKEN")
+        if raw_token:
+            token = raw_token.strip().strip('"').strip("'")
         
     return url, token
 
@@ -42,25 +46,29 @@ def _get_turso_client():
 def _execute(query, params=None):
     """
     Executes a query and returns (rows, last_insert_rowid).
-    Works seamlessly across Turso cloud and local SQLite.
+    Works seamlessly across Turso cloud with automatic graceful fallback to local SQLite.
     """
     params = params or ()
     if USE_TURSO:
-        client = _get_turso_client()
-        res = client.execute(query, params)
-        rows = [list(r) for r in res.rows]
-        last_id = res.last_insert_rowid
-        client.close()
-        return rows, last_id
-    else:
-        conn = sqlite3.connect(LOCAL_DB_PATH)
-        cursor = conn.cursor()
-        cursor.execute(query, params)
-        rows = cursor.fetchall()
-        last_id = cursor.lastrowid
-        conn.commit()
-        conn.close()
-        return rows, last_id
+        try:
+            client = _get_turso_client()
+            res = client.execute(query, params)
+            rows = [list(r) for r in res.rows]
+            last_id = res.last_insert_rowid
+            client.close()
+            return rows, last_id
+        except Exception as e:
+            print(f"[VisoVibe DB] Turso error: {e}. Falling back to local SQLite.")
+
+    # Graceful fallback: local SQLite
+    conn = sqlite3.connect(LOCAL_DB_PATH)
+    cursor = conn.cursor()
+    cursor.execute(query, params)
+    rows = cursor.fetchall()
+    last_id = cursor.lastrowid
+    conn.commit()
+    conn.close()
+    return rows, last_id
 
 def init_db():
     queries = [
@@ -87,8 +95,25 @@ def init_db():
         )
         """
     ]
-    for q in queries:
-        _execute(q)
+    
+    # 1. Always ensure local SQLite schema is initialized
+    try:
+        conn = sqlite3.connect(LOCAL_DB_PATH)
+        cur = conn.cursor()
+        for q in queries:
+            cur.execute(q)
+        conn.commit()
+        conn.close()
+    except Exception as e:
+        print(f"[VisoVibe DB] Local schema init error: {e}")
+
+    # 2. Try initializing Turso cloud schema if configured
+    if USE_TURSO:
+        for q in queries:
+            try:
+                _execute(q)
+            except Exception as e:
+                print(f"[VisoVibe DB] Turso init query error: {e}")
 
 def _hash_pw(password: str) -> str:
     return hashlib.sha256(password.encode("utf-8")).hexdigest()
@@ -97,33 +122,21 @@ def register_user(username: str, password: str):
     username = username.strip().lower()
     if not username or not password:
         return False, "Username and password cannot be empty."
+    if len(username) < 3:
+        return False, "Username must be at least 3 characters."
+    if len(password) < 4:
+        return False, "Password must be at least 4 characters."
 
     try:
-        # Check if username exists
-        existing_rows, _ = _execute("SELECT id FROM users WHERE username = ?", (username,))
-        if existing_rows:
-            return False, "Username already exists."
-
-        _, user_id = _execute(
+        _execute(
             "INSERT INTO users (username, password_hash) VALUES (?, ?)",
             (username, _hash_pw(password))
         )
-
-        # Seed default default playlists for this user
-        default_playlists = [
-            ("happy", "Happy Vibes Mix", "PLAzYd4uzG2LrbXNOAugat_pdqF2ueDZ2-", "High Energy Vibes"),
-            ("sad", "Soulful Melodies", "PL_DaWb6RFQc1z_KhtsFR3SsOgXXb-E5js", "Heartbreak & Chill"),
-            ("calm", "Calm & Breezy Lo-Fi", "PLF0p4MtOouIJl6we_7n5RdWUQ_7EZaCPh", "Chill Tracks"),
-            ("angry", "Rage & Workout BGMs", "PLjtEEV8UfHg8U5GoFsyXhSAIiSY3AChNQ", "Intense Mass Beats")
-        ]
-        for emo, title, pid, art in default_playlists:
-            _execute("""
-                INSERT OR IGNORE INTO user_playlists (user_id, emotion, title, source_type, source_id, artist)
-                VALUES (?, ?, ?, 'playlist', ?, ?)
-            """, (user_id, emo, title, pid, art))
-
-        return True, "Registered successfully!"
+        return True, "Account created successfully!"
     except Exception as e:
+        err = str(e).lower()
+        if "unique" in err or "already exists" in err:
+            return False, "Username already taken. Please choose another."
         return False, f"Registration failed: {str(e)}"
 
 def authenticate_user(username: str, password: str):

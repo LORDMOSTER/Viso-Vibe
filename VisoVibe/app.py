@@ -73,7 +73,10 @@ mood_palettes = {
 }
 
 # ─── DB Init & Session State ──────────────────────────────────────────────────────────────────────
-init_db()
+try:
+    init_db()
+except Exception as _e:
+    print(f"[VisoVibe] Warning: init_db failed: {_e}")
 
 _state_defaults = {
     "luffy_vibe": None,

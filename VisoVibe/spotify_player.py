@@ -432,6 +432,110 @@ body {{
     flex-shrink: 0;
 }}
 
+
+/* ── Up Next Preview Row ── */
+.up-next-row {{
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 12px;
+    margin-top: 16px;
+    padding: 10px 16px;
+    background: rgba(255, 255, 255, 0.025);
+    border: 1px solid rgba(255, 255, 255, 0.07);
+    border-radius: 14px;
+    cursor: pointer;
+    transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
+    backdrop-filter: blur(15px);
+}}
+
+.up-next-row:hover {{
+    background: rgba({dc1}, 0.08);
+    border-color: rgba({dc1}, 0.35);
+    transform: translateY(-1px);
+    box-shadow: 0 4px 20px rgba({dc1}, 0.15);
+}}
+
+.up-next-left {{
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    overflow: hidden;
+    flex: 1;
+}}
+
+.up-next-badge {{
+    font-family: 'Space Mono', monospace;
+    font-size: 8px;
+    font-weight: 700;
+    letter-spacing: 2px;
+    color: rgba({dc1}, 1);
+    background: rgba({dc1}, 0.12);
+    border: 1px solid rgba({dc1}, 0.3);
+    padding: 3px 8px;
+    border-radius: 6px;
+    text-transform: uppercase;
+    flex-shrink: 0;
+}}
+
+.up-next-title {{
+    font-size: 11.5px;
+    font-weight: 500;
+    color: rgba(255, 255, 255, 0.7);
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    letter-spacing: 0.2px;
+}}
+
+.up-next-action {{
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 26px;
+    height: 26px;
+    border-radius: 50%;
+    background: rgba(255, 255, 255, 0.04);
+    border: 1px solid rgba(255, 255, 255, 0.08);
+    flex-shrink: 0;
+    transition: all 0.2s ease;
+}}
+
+.up-next-row:hover .up-next-action {{
+    background: rgba({dc1}, 0.2);
+    border-color: rgba({dc1}, 0.5);
+    transform: scale(1.08);
+}}
+
+.up-next-action svg {{
+    width: 12px;
+    height: 12px;
+    fill: rgba(255, 255, 255, 0.6);
+    transition: fill 0.2s ease;
+}}
+
+.up-next-row:hover .up-next-action svg {{
+    fill: rgba({dc1}, 1);
+}}
+
+.queue-item.next-up {{
+    border-color: rgba({dc1}, 0.35);
+    background: rgba({dc1}, 0.06);
+}}
+
+.qi-up-next {{
+    font-family: 'Space Mono', monospace;
+    font-size: 7.5px;
+    font-weight: 700;
+    letter-spacing: 1.5px;
+    color: rgba({dc1}, 0.9);
+    background: rgba({dc1}, 0.15);
+    border: 1px solid rgba({dc1}, 0.3);
+    padding: 2px 6px;
+    border-radius: 4px;
+    text-transform: uppercase;
+}}
+
 /* ── Interactive Queue Section (Spotify Drawer) ── */
 .queue-container {{
     margin-top: 16px;
@@ -656,8 +760,8 @@ body {{
         <div class="ctrl-btn ctrl-play-btn" onclick="togglePlay()" id="playBtnEl" title="Play/Pause">
             <svg id="playIcon" viewBox="0 0 24 24"><path d="M8 5v14l11-7z"/></svg>
         </div>
-        <div class="ctrl-btn ctrl-sm" onclick="nextTrack()" title="Next Track">
-            <svg viewBox="0 0 24 24"><path d="M6 18l8.5-6L6 6v12zm2.5-6 8.5 6V6z"/></svg>
+        <div class="ctrl-btn ctrl-sm" onclick="nextTrack()" title="Next Track" id="nextTrackBtn">
+            <svg viewBox="0 0 24 24"><path d="M6 18l8.5-6L6 6v12zM16 6v12h2V6h-2z"/></svg>
         </div>
         <div class="ctrl-btn ctrl-sm" onclick="repeatToggle()" id="repeatBtn" title="Repeat Current Song">
             <svg viewBox="0 0 24 24"><path d="M7 7h10v3l4-4-4-4v3H5v6h2zm10 10H7v-3l-4 4 4 4v-3h12v-6h-2z"/></svg>
@@ -671,6 +775,18 @@ body {{
             <div class="vol-fill" id="volFill"></div>
         </div>
         <span class="vol-label" id="volLabel">80%</span>
+    </div>
+
+    
+    <!-- Up Next Track Preview Bar -->
+    <div class="up-next-row" id="upNextRow" onclick="nextTrack()" title="Skip to next track">
+        <div class="up-next-left">
+            <span class="up-next-badge">UP NEXT</span>
+            <span class="up-next-title" id="upNextTitleDisplay">Loading next track...</span>
+        </div>
+        <div class="up-next-action">
+            <svg viewBox="0 0 24 24"><path d="M6 18l8.5-6L6 6v12zM16 6v12h2V6h-2z"/></svg>
+        </div>
     </div>
 
     <!-- Up Next & Queue Drawer -->
@@ -851,12 +967,18 @@ function renderQueueUI() {{
         infoDiv.appendChild(titleSpan);
         infoDiv.appendChild(artistSpan);
 
-        var nowPlayingBadge = document.createElement('span');
-        nowPlayingBadge.className = 'qi-now-playing';
-        nowPlayingBadge.textContent = 'PLAYING';
-
-        itemDiv.appendChild(infoDiv);
-        itemDiv.appendChild(nowPlayingBadge);
+        if (idx === currentIndex) {{
+            var nowPlayingBadge = document.createElement('span');
+            nowPlayingBadge.className = 'qi-now-playing';
+            nowPlayingBadge.textContent = 'PLAYING';
+            itemDiv.appendChild(nowPlayingBadge);
+        }} else if (idx === currentIndex + 1) {{
+            itemDiv.classList.add('next-up');
+            var nextBadge = document.createElement('span');
+            nextBadge.className = 'qi-up-next';
+            nextBadge.textContent = 'NEXT';
+            itemDiv.appendChild(nextBadge);
+        }}
         listEl.appendChild(itemDiv);
     }});
 }}
@@ -951,6 +1073,27 @@ function updateTrackLabels() {{
         document.getElementById('trackTitleDisplay').textContent = cur.title;
         document.getElementById('trackArtistDisplay').textContent = cur.artist;
     }}
+    
+    // Update Up Next preview bar
+    var nextEl = document.getElementById('upNextTitleDisplay');
+    if (nextEl) {{
+        if (isRepeat) {{
+            nextEl.textContent = 'Repeat current: ' + (cur ? cur.title : '');
+        }} else if (isShuffled && queueItems.length > 1) {{
+            nextEl.textContent = 'Shuffle Next (Random Pick)';
+        }} else if (currentIndex < queueItems.length - 1) {{
+            var nxt = queueItems[currentIndex + 1];
+            nextEl.textContent = nxt.title + (nxt.artist ? ' · ' + nxt.artist : '');
+        }} else if (queueItems.length > 1) {{
+            var loopNxt = queueItems[0];
+            nextEl.textContent = 'Loop back: ' + loopNxt.title;
+        }} else if (cur && cur.source_type === 'playlist') {{
+            nextEl.textContent = 'Next song in playlist (Auto-advance)';
+        }} else {{
+            nextEl.textContent = 'Queue end · Add more songs below';
+        }}
+    }}
+    
     renderQueueUI();
 }}
 

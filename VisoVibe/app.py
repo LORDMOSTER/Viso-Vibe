@@ -1008,7 +1008,7 @@ else:
         player_html = get_spotify_player_html(
             dc1, dc2, dc3, daccent, dglow, dgrad, dsai, dartist, q_items, 0
         )
-        components.html(player_html, height=480)
+        components.html(player_html, height=520)
 
     st.markdown('<div class="bottom-gap"></div>', unsafe_allow_html=True)
 

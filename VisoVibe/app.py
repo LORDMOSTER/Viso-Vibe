@@ -694,6 +694,8 @@ st.markdown(f"""
     <div class="vv-tagline">Emotion · Frequency · Music</div>
 </div>
 <div class="vv-rule"></div>
+""", unsafe_allow_html=True)
+
 
 # ─── User Profile & Playlist Personalization ──────────────────────────────────
 user = st.session_state.user
@@ -788,7 +790,7 @@ else:
             else:
                 st.warning("Please provide a valid YouTube URL or ID.")
 
-""", unsafe_allow_html=True)
+
 
 # ─── Camera / Detection Flow ─────────────────────────────────────────────────
 if st.session_state.luffy_vibe is None:

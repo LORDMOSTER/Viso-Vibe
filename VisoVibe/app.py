@@ -72,10 +72,21 @@ mood_palettes = {
     },
 }
 
-# ─── Session State ────────────────────────────────────────────────────────────
-for key in ["luffy_vibe", "sai", "rock_artist", "yt_id", "naruto"]:
-    if key not in st.session_state:
-        st.session_state[key] = None
+# ─── DB Init & Session State ──────────────────────────────────────────────────────────────────────
+init_db()
+
+_state_defaults = {
+    "luffy_vibe": None,
+    "sai": None,
+    "rock_artist": None,
+    "yt_id": None,
+    "naruto": None,
+    "user": None,
+    "custom_queue": [],
+}
+for _key, _default in _state_defaults.items():
+    if _key not in st.session_state:
+        st.session_state[_key] = _default
 
 current_mood = st.session_state.luffy_vibe or "calm"
 pal = mood_palettes.get(current_mood, mood_palettes["calm"])
@@ -698,7 +709,7 @@ st.markdown(f"""
 
 
 # ─── User Profile & Playlist Personalization ──────────────────────────────────
-user = st.session_state.user
+user = st.session_state.get('user', None)
 
 if not user:
     with st.expander("👤 Log In / Sign Up (Remember Your Music)", expanded=False):
@@ -900,7 +911,7 @@ else:
         dartist        = st.session_state.rock_artist
         dytid          = st.session_state.yt_id
 
-        q_items = st.session_state.custom_queue
+        q_items = st.session_state.get('custom_queue', [])
         if not q_items:
             q_items = [{
                 "title": dsai,
